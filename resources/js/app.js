@@ -139,3 +139,90 @@ document.querySelectorAll('[data-delete-transaction]').forEach((form) => {
         }
     });
 });
+
+document.addEventListener('submit', async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLFormElement) || !target.matches('[data-admin-action]')) {
+        return;
+    }
+
+    event.preventDefault();
+    const form = target;
+
+    if (!window.confirm(form.dataset.confirm ?? 'Lanjutkan tindakan ini?')) {
+        return;
+    }
+
+    const button = form.querySelector('button[type="submit"]');
+    const row = form.closest('[data-admin-user-row]');
+    const feedback = document.querySelector('[data-admin-feedback]');
+    const action = form.dataset.adminAction;
+
+    if (!(button instanceof HTMLButtonElement) || !(row instanceof HTMLTableRowElement) || !feedback) {
+        return;
+    }
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = action === 'delete' ? 'Menghapus...' : 'Mereset...';
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        let data;
+        try {
+            data = await response.json();
+        } catch {
+            data = null;
+        }
+
+        if (!response.ok) {
+            throw new Error(typeof data?.message === 'string'
+                ? data.message
+                : 'Tindakan gagal dilakukan. Silakan coba lagi.');
+        }
+        if (typeof data?.message !== 'string') {
+            throw new Error('Respons server tidak valid. Muat ulang halaman dan coba lagi.');
+        }
+
+        if (action === 'delete') {
+            row.remove();
+            const tbody = document.querySelector('[data-admin-users]');
+            if (tbody && !tbody.querySelector('[data-admin-user-row]')) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = 4;
+                emptyCell.className = 'empty-state';
+                emptyCell.dataset.adminEmpty = '';
+                emptyCell.textContent = 'Belum ada akun pengguna lain.';
+                emptyRow.append(emptyCell);
+                tbody.replaceChildren(emptyRow);
+            }
+        } else {
+            if (!Number.isInteger(data.incomesCount) || !Number.isInteger(data.expensesCount)) {
+                throw new Error('Respons reset tidak valid. Muat ulang halaman dan coba lagi.');
+            }
+
+            const counts = row.querySelector('[data-account-finance-counts]');
+            if (counts) {
+                counts.textContent = `${data.incomesCount} pemasukan · ${data.expensesCount} pengeluaran`;
+            }
+        }
+
+        feedback.textContent = data.message;
+        feedback.hidden = false;
+    } catch (error) {
+        button.disabled = false;
+        button.textContent = originalText;
+        feedback.textContent = error instanceof Error
+            ? error.message
+            : 'Tindakan gagal dilakukan. Silakan coba lagi.';
+        feedback.hidden = false;
+    }
+});

@@ -29,6 +29,9 @@
             </div>
             <div class="topbar-account">
                 <span class="topbar-note"><span aria-hidden="true">✦</span> kelola dengan ceria</span>
+                @if(auth()->user()->is_admin)
+                    <a href="{{ route('admin.users.create') }}" class="logout-button">Daftar akun</a>
+                @endif
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="logout-button">Keluar</button>

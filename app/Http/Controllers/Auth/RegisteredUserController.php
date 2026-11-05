@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RegisteredUserController extends Controller
 {
@@ -22,13 +23,22 @@ class RegisteredUserController extends Controller
         }
 
         $validated = $request->validate([
-            'username' => ['required', 'string', 'min:3', 'max:30', 'alpha_dash', 'unique:users,username'],
+            'username' => [
+                'required',
+                'string',
+                'min:3',
+                'max:30',
+                'alpha_dash',
+                Rule::notIn([Str::lower((string) config('admin.username'))]),
+                'unique:users,username',
+            ],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'username.required' => 'Username wajib diisi.',
             'username.min' => 'Username minimal 3 karakter.',
             'username.max' => 'Username maksimal 30 karakter.',
             'username.alpha_dash' => 'Username hanya boleh berisi huruf, angka, tanda hubung, dan garis bawah.',
+            'username.not_in' => 'Username tersebut khusus untuk administrator.',
             'username.unique' => 'Username sudah digunakan.',
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal 8 karakter.',

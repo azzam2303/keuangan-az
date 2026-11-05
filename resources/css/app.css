@@ -1817,6 +1817,14 @@ textarea.form-control {
     color: #6d5b8c;
 }
 
+.admin-actions {
+    min-width: 13rem;
+}
+
+.admin-actions form + form {
+    margin-left: 0.35rem;
+}
+
 .login-page {
     display: grid;
     min-height: 100vh;

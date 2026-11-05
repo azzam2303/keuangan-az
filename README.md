@@ -27,6 +27,17 @@ Laravel has the most extensive and thorough [documentation](https://laravel.com/
 
 If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
+## Admin akun
+
+Jalankan migrasi dan seeder admin satu kali setelah mengambil perubahan ini:
+
+```sh
+php artisan migrate
+php artisan db:seed --class=AdminUserSeeder
+```
+
+Login awal: username `admin20`, kata sandi `admin123`. Halaman admin tersedia di `/admin`. Sebelum aplikasi digunakan di lingkungan publik, atur `ADMIN_PASSWORD` dengan kata sandi yang kuat di `.env` sebelum menjalankan seeder.
+
 ## Laravel Sponsors
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
